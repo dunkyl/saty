@@ -1,0 +1,24 @@
+WHITESPACE = _{ " " | "\r\n" | "\n" }
+COMMENT = _{ "//" ~ (ANY)* ~ "\n" }
+
+literal = { "TRUE" | "FALSE" }
+prefix_op = { "NOT" | "ALL" | "ANY" | "NONE" | "ONE" }
+infix_op = { "AND" | "OR" | "XOR" | "NOR" | "NAND" | "XNOR" }
+
+variable = @{ ASCII_ALPHA_LOWER ~ (ASCII_ALPHA_LOWER | ASCII_DIGIT)* }
+
+list = { "[" ~ (expr)+ ~ "]" }
+
+term = _{ !prefix_op ~ !infix_op ~ (literal | variable | list) }
+
+parenexpr = _{ "(" ~ expr ~ ")" }
+
+apply_infix = { term ~ infix_op ~ expr | parenexpr ~ infix_op ~ expr}
+apply_prefix = { prefix_op ~ expr | prefix_op ~ parenexpr}
+
+expr = _{ apply_infix | apply_prefix | term | parenexpr } 
+
+assignment = { variable ~ "=" ~ expr }
+
+file = { SOI ~ (assignment ~ "\n"*)* ~ expr ~ EOI }
+
